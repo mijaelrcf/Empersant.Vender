@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="RouteMap.aspx.cs" Inherits="PrototypeRouteOSM.Pages.RouteMap" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="RouteMapClickLocations.aspx.cs" Inherits="PrototypeRouteOSM.Pages.RouteMapClickLocations" %>
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -25,6 +25,7 @@
             <p><i>Haz clic en el mapa para agregar clientes (El primero será el depósito).</i></p>
             <button type="button" class="btn-action" onclick="solicitarRutas()">Calcular Rutas Óptimas</button>
             <button type="button" onclick="limpiarMapa()">Limpiar</button>
+            <a href="/Pages/Index.aspx" class="nav-link">Volver</a>
         </div>
 
         <div id="map"></div>

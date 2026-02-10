@@ -11,7 +11,7 @@ namespace PrototypeRouteOSM.Pages
 {
 
 
-    public partial class RouteMap
+    public partial class RouteMapHaversine
     {
 
         /// <summary>

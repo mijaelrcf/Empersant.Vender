@@ -5,7 +5,7 @@ using System.Web.Services;
 
 namespace PrototypeRouteOSM.Pages
 {
-    public partial class RouteMap : System.Web.UI.Page
+    public partial class RouteMapClickLocations : System.Web.UI.Page
     {
         // Estructura simple para coordenadas
         public class Ubicacion

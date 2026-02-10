@@ -88,29 +88,54 @@
   <ItemGroup>
     <Content Include="Global.asax" />
     <Content Include="orLogo.png" />
-    <Content Include="Pages\RouteMap.aspx" />
-    <Content Include="Pages\RouteMap2.aspx" />
+    <Content Include="Pages\Index.aspx" />
+    <Content Include="Pages\RouteMapClickLocations.aspx" />
+    <Content Include="Pages\RouteMapGoogleOrTools.aspx" />
+    <Content Include="Pages\RouteMapHaversine.aspx" />
+    <Content Include="Pages\RouteMapHaversine2-Opt.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\CustomerRepository.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\CustomerLocation.cs" />
     <Compile Include="Models\RoutePlan.cs" />
-    <Compile Include="Pages\RouteMap.aspx.cs">
-      <DependentUpon>RouteMap.aspx</DependentUpon>
+    <Compile Include="Pages\Index.aspx.cs">
+      <DependentUpon>Index.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\RouteMap.aspx.designer.cs">
-      <DependentUpon>RouteMap.aspx</DependentUpon>
+    <Compile Include="Pages\Index.aspx.designer.cs">
+      <DependentUpon>Index.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Pages\RouteMap2.aspx.cs">
-      <DependentUpon>RouteMap2.aspx</DependentUpon>
+    <Compile Include="Pages\RouteMapClickLocations.aspx.cs">
+      <DependentUpon>RouteMapClickLocations.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\RouteMap2.aspx.designer.cs">
-      <DependentUpon>RouteMap2.aspx</DependentUpon>
+    <Compile Include="Pages\RouteMapClickLocations.aspx.designer.cs">
+      <DependentUpon>RouteMapClickLocations.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\RouteMapGoogleOrTools.aspx.cs">
+      <DependentUpon>RouteMapGoogleOrTools.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\RouteMapGoogleOrTools.aspx.designer.cs">
+      <DependentUpon>RouteMapGoogleOrTools.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\RouteMapHaversine.aspx.cs">
+      <DependentUpon>RouteMapHaversine.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\RouteMapHaversine.aspx.designer.cs">
+      <DependentUpon>RouteMapHaversine.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\RouteMapHaversine2-Opt.aspx.cs">
+      <DependentUpon>RouteMapHaversine2-Opt.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\RouteMapHaversine2-Opt.aspx.designer.cs">
+      <DependentUpon>RouteMapHaversine2-Opt.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
