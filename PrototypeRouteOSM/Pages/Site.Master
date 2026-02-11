@@ -1,0 +1,27 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="PrototypeRouteOSM.Pages.Site" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <title></title>
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server">
+        <title>Prototype Route OSM</title>
+        <!-- Aquí van tus estilos y scripts globales -->
+        <link href="<%= ResolveUrl("~/Styles/Site.css") %>" rel="stylesheet" type="text/css" />
+        <script src="<%= ResolveUrl("~/Scripts/site.js") %>" type="text/javascript"></script>
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+    <form id="form1" runat="server">
+       <!-- Layout común -->
+        <div id="header">Encabezado</div>
+        <div id="menu">Menú</div>
+
+        <!-- Aquí se inyecta el contenido de cada Web Form -->
+        <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+
+        <div id="footer">Pie de página</div>
+    </form>
+</body>
+</html>

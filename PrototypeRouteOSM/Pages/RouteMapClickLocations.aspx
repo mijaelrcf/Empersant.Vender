@@ -1,38 +1,57 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="RouteMapClickLocations.aspx.cs" Inherits="PrototypeRouteOSM.Pages.RouteMapClickLocations" %>
+﻿<%@ Page Language="C#"
+    MasterPageFile="~/Pages/Site.Master"
+    AutoEventWireup="true"
+    CodeBehind="RouteMapClickLocations.aspx.cs"
+    Inherits="PrototypeRouteOSM.Pages.RouteMapClickLocations" %>
 
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
-    <title>Optimización de Rutas OSM</title>
+<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
-        #map { height: 600px; width: 100%; margin-top: 20px; border: 2px solid #ccc; }
-        .controls { padding: 20px; background: #f9f9f9; border-bottom: 1px solid #ddd; }
-        .btn-action { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
-        .btn-action:hover { background: #0056b3; }
+        #map {
+            height: 600px;
+            width: 100%;
+            margin-top: 20px;
+            border: 2px solid #ccc;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .btn-action {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+            .btn-action:hover {
+                background: #0056b3;
+            }
     </style>
-</head>
-<body>
-    <form id="form1" runat="server">
-        <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true" />
-        
-        <div class="controls">
-            <h2>Gestión de Rutas con OpenStreetMap</h2>
-            <label>Número de Vendedores:</label>
-            <input type="number" id="txtVendedores" value="2" min="1" max="10" />
-            <br /><br />
-            <p><i>Haz clic en el mapa para agregar clientes (El primero será el depósito).</i></p>
-            <button type="button" class="btn-action" onclick="solicitarRutas()">Calcular Rutas Óptimas</button>
-            <button type="button" onclick="limpiarMapa()">Limpiar</button>
-            <a href="/Pages/Index.aspx" class="nav-link">Volver</a>
-        </div>
-
-        <div id="map"></div>
-    </form>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true" />
+
+    <div class="controls">
+        <h2>Gestión de Rutas con OpenStreetMap</h2>
+        <label>Número de Vendedores:</label>
+        <input type="number" id="txtVendedores" value="2" min="1" max="10" />
+        <br />
+        <br />
+        <p><i>Haz clic en el mapa para agregar clientes (El primero será el depósito).</i></p>
+        <button type="button" class="btn-action" onclick="solicitarRutas()">Calcular Rutas Óptimas</button>
+        <button type="button" onclick="limpiarMapa()">Limpiar</button>
+        <a href="/Pages/Index.aspx" class="nav-link">Volver</a>
+    </div>
+
+    <div id="map"></div>
     <script>
         // 1. Inicializar Mapa
         var map = L.map('map').setView([-16.5000, -68.1500], 13); // Coordenadas ejemplo (La Paz)
@@ -52,17 +71,17 @@
         var colores = ['blue', 'red', 'green', 'orange', 'purple'];
 
         // 3. Evento click en mapa para agregar clientes
-        map.on('click', function(e) {
+        map.on('click', function (e) {
             var lat = e.latlng.lat;
             var lng = e.latlng.lng;
-            
+
             var tipo = (deposito == null) ? "Depósito" : "Cliente " + (clientes.length + 1);
-            
+
             // Agregar marcador visual
             var marker = L.marker([lat, lng]).addTo(map)
                 .bindPopup(tipo)
                 .openPopup();
-            
+
             markers.push(marker);
 
             var ubicacion = { Nombre: tipo, Lat: lat, Lng: lng };
@@ -101,7 +120,7 @@
             };
 
             // Usamos PageMethods (nativo de WebForms para AJAX)
-            PageMethods.CalcularRutas(dataToSend.clientes, dataToSend.deposito, dataToSend.numVendedores, 
+            PageMethods.CalcularRutas(dataToSend.clientes, dataToSend.deposito, dataToSend.numVendedores,
                 onSuccess, onError);
         }
 
@@ -118,7 +137,7 @@
                 // Dibujar polilinea
                 var polyline = L.polyline(latlngs, { color: colorRuta, weight: 5 }).addTo(map);
                 routeLines.push(polyline);
-                
+
                 // Hacer zoom para ver todo
                 map.fitBounds(polyline.getBounds());
             });
@@ -130,5 +149,6 @@
             alert("Error al calcular: " + error.get_message());
         }
     </script>
-</body>
-</html>
+</asp:Content>
+
+
