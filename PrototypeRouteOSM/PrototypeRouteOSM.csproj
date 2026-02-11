@@ -93,6 +93,8 @@
     <Content Include="Pages\RouteMapGoogleOrTools.aspx" />
     <Content Include="Pages\RouteMapHaversine.aspx" />
     <Content Include="Pages\RouteMapHaversine2-Opt.aspx" />
+    <Content Include="Scripts\site.js" />
+    <Content Include="Styles\Site.css" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

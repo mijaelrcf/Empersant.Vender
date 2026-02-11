@@ -1,0 +1,52 @@
+﻿#map {
+    height: 600px;
+    width: 100%;
+    border: 2px solid #333;
+}
+
+.controls {
+    padding: 15px;
+    background: #eee;
+    border-bottom: 1px solid #ccc;
+    font-family: sans-serif;
+}
+
+.btn-calc {
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+    .btn-calc:hover {
+        background: #218838;
+    }
+
+/* Estilo base para el contenedor del icono */
+.custom-div-icon {
+    background: transparent;
+    border: none;
+}
+
+/* Estilos para los marcadores numerados */
+.numero-marcador {
+    background-color: #2196F3;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    border: 3px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+    .numero-marcador.deposito {
+        background-color: #4CAF50;
+        font-size: 16px;
+    }
