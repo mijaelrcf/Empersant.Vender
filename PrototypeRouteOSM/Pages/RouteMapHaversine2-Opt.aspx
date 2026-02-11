@@ -64,6 +64,15 @@
             <button type="button" class="btn-calc" onclick="generarRuta()">📍 Trazar Ruta Óptima</button>
             <span>(Depósito simulado: Oficina Central)</span>
             <a href="/Pages/Index.aspx" class="nav-link">Volver</a>
+            <br />
+            <div style="margin-top: 15px; font-size: 18px; font-weight: bold; color: #333;">
+                Distancia Total Estimada: <span id="lblDistancia" style="color: #007bff;">0.00</span> km
+           
+            </div>
+            <br />
+            <div style="margin-top: 15px; font-size: 18px; font-weight: bold; color: #333;">
+                Tiempo Total Estimado: <span id="lblTiempo" style="color: #007bff;">00:00</span> min
+            </div>
         </div>
 
         <div id="map"></div>
@@ -123,6 +132,9 @@
         function generarRuta() {
             if (clientes.length === 0) return;
 
+            // Poner el texto en "Calculando..."
+            document.getElementById('lblDistancia').innerText = "Calculando...";
+
             // 1. Pedimos al servidor el ORDEN óptimo (lo que ya hace tu C#)
             PageMethods.CalcularRutas(clientes, depositoFijo, 1, function (rutas) {
 
@@ -170,7 +182,23 @@
                         fitSelectedRoutes: true,
                         show: false, // Oculta el cuadro de texto con instrucciones de manejo
                         createMarker: function () { return null; } // Usamos nuestros propios marcadores
-                    }).addTo(map);
+                    })
+                        // --- Para obtener la distancia en kilometros ---
+                        .on('routesfound', function (e) {
+                            var routes = e.routes;
+                            var summary = routes[0].summary;
+                            // summary.totalDistance viene en metros. Lo dividimos entre 1000.
+                            var km = (summary.totalDistance / 1000).toFixed(2);
+
+                            document.getElementById('lblDistancia').innerText = km;
+
+                            // Opcional: También puedes obtener el tiempo estimado
+                            var tiempoMinutos = Math.round(summary.totalTime / 60);
+                            document.getElementById('lblTiempo').innerText = tiempoMinutos;
+                            //console.log("Tiempo estimado: " + tiempoMinutos + " mins");
+                        })
+                        // ----------------------------------
+                        .addTo(map);
                 });
             }, function (err) { alert(err.get_message()); });
         }

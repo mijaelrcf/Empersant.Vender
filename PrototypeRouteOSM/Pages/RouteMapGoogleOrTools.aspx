@@ -11,6 +11,7 @@
         .controls { padding: 15px; background: #eee; border-bottom: 1px solid #ccc; font-family: sans-serif; }
         .btn-calc { background: #28a745; color: white; padding: 10px 20px; border: none; font-size: 16px; cursor: pointer; }
         .btn-calc:hover { background: #218838; }
+        
         /* Estilos para los marcadores numerados */
         .numero-marcador {
             background-color: #2196F3;
@@ -130,10 +131,10 @@
                         marcadoresClientes.push(marker);
                     });
 
-                    // 2. Convertir nuestros puntos ordenados a "Waypoints" para el motor de calles
+                    // 3. Convertir nuestros puntos ordenados a "Waypoints" para el motor de calles
                     var puntosRuta = r.Puntos.map(p => L.latLng(p.Latitud, p.Longitud));
 
-                    // 3. Crear el control de ruta "tipo Uber"
+                    // 4. Crear el control de ruta "tipo Uber"
                     routingControl = L.Routing.control({
                         waypoints: puntosRuta,
                         router: L.Routing.osrmv1({

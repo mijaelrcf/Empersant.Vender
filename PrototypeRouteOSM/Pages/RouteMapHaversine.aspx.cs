@@ -29,7 +29,11 @@ namespace PrototypeRouteOSM.Pages
             // Para este prototipo usamos "Vecino Más Cercano".
             List<CustomerLocation> rutaOrdenada = OptimizarRutaVecinoMasCercano(clientes, deposito);
 
-            // 3. Devolvemos la ruta empaquetada
+            // 3. ASIGNAR ORDEN DE RECORRIDO A CADA PUNTO
+            for (int i = 0; i < rutaOrdenada.Count; i++)
+                rutaOrdenada[i].OrdenRecorrido = i;
+
+            // 4. Devolvemos la ruta empaquetada
             return new List<RoutePlan>
             {
                 new RoutePlan
