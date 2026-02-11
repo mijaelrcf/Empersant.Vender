@@ -21,9 +21,7 @@
             <br />
             <div style="margin-top: 15px; font-size: 18px; font-weight: bold; color: #333;">
                 Distancia Total Estimada: <span id="lblDistancia" style="color: #007bff;">0.00</span> km
-           
             </div>
-            <br />
             <div style="margin-top: 15px; font-size: 18px; font-weight: bold; color: #333;">
                 Tiempo Total Estimado: <span id="lblTiempo" style="color: #007bff;">00:00</span> min
             </div>
