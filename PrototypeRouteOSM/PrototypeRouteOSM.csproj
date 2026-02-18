@@ -50,6 +50,9 @@
     <Reference Include="Google.Protobuf, Version=3.33.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Protobuf.3.33.1\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=3.2.0.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.3.2.0\lib\net462\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
@@ -88,7 +91,11 @@
   <ItemGroup>
     <Content Include="Global.asax" />
     <Content Include="orLogo.png" />
+    <Content Include="Pages\GeoClusteringPage.aspx" />
     <Content Include="Pages\Index.aspx" />
+    <Content Include="Pages\MapClustering.aspx" />
+    <Content Include="Pages\RouteClustering.aspx" />
+    <Content Include="Pages\RouteMapAngularSweep.aspx" />
     <Content Include="Pages\RouteMapClickLocations.aspx" />
     <Content Include="Pages\RouteMapGoogleOrTools.aspx" />
     <Content Include="Pages\RouteMapHaversine.aspx" />
@@ -103,13 +110,42 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\CustomerLocation.cs" />
+    <Compile Include="Models\ClienteZonaModel.cs" />
     <Compile Include="Models\RoutePlan.cs" />
+    <Compile Include="Pages\GeoClusteringPage.aspx.cs">
+      <DependentUpon>GeoClusteringPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\GeoClusteringPage.aspx.designer.cs">
+      <DependentUpon>GeoClusteringPage.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Index.aspx.cs">
       <DependentUpon>Index.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Pages\Index.aspx.designer.cs">
       <DependentUpon>Index.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\MapClustering.aspx.cs">
+      <DependentUpon>MapClustering.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\MapClustering.aspx.designer.cs">
+      <DependentUpon>MapClustering.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\RouteClustering.aspx.cs">
+      <DependentUpon>RouteClustering.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\RouteClustering.aspx.designer.cs">
+      <DependentUpon>RouteClustering.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\RouteMapAngularSweep.aspx.cs">
+      <DependentUpon>RouteMapAngularSweep.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\RouteMapAngularSweep.aspx.designer.cs">
+      <DependentUpon>RouteMapAngularSweep.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\RouteMapClickLocations.aspx.cs">
       <DependentUpon>RouteMapClickLocations.aspx</DependentUpon>
@@ -147,6 +183,8 @@
       <DependentUpon>Site.Master</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\GeoClusteringOSM.cs" />
+    <Compile Include="Utilities\AngularSweepUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="linear_solver\linear_solver.proto" />

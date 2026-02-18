@@ -69,15 +69,13 @@
     <form id="form1" runat="server">
         <div class="main-container">
             <h1>Prototype Route OSM</h1>
-            
+
             <div class="link-group">
                 <a href="/Pages/RouteMapClickLocations.aspx" class="nav-link">Mapa de Rutas: Click Ubicaciones</a>
-
                 <a href="/Pages/RouteMapHaversine.aspx" class="nav-link">Mapa de Rutas: Haversine</a>
-
                 <a href="/Pages/RouteMapGoogleOrTools.aspx" class="nav-link">Mapa de Rutas: Google OR-Tools</a>
-
                 <a href="/Pages/RouteMapHaversine2-Opt.aspx" class="nav-link">Mapa de Rutas: Haversine y 2-Opt</a>
+                <a href="/Pages/RouteMapAngularSweep.aspx" class="nav-link">Mapa de Rutas: Angular Sweep</a>
             </div>
 
             <div class="footer-text">
