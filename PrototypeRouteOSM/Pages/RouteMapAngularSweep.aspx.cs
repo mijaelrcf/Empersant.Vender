@@ -46,7 +46,6 @@ namespace PrototypeRouteOSM.Pages
             try
             {
                 // Generar 100 clientes de ejemplo en La Paz
-                //List<ClienteOrigenGis> clientesDemo = GenerarClientesLaPazDemo(); // test random
                 List<ClienteOrigenGis> clientesDemo = GetListCustomerLocation();
 
                 // Número de zonas por defecto
@@ -69,10 +68,6 @@ namespace PrototypeRouteOSM.Pages
                     tabuIteraciones: 2000,
                     tabuTenure: 40
                 );
-
-                // ASIGNAR ORDEN DE RECORRIDO A CADA PUNTO
-                for (int i = 0; i < zonas.Count; i++)
-                    zonas[i].OrdenRecorrido = i;
 
                 if (zonas != null && zonas.Count > 0)
                 {
@@ -117,7 +112,6 @@ namespace PrototypeRouteOSM.Pages
 
             // AQUÍ DEBERÍAS OBTENER LOS CLIENTES DE TU BASE DE DATOS
             // Por ahora, usamos el demo
-            //List<ClienteOrigenGis> theList = GenerarClientesLaPazDemo(); // test random
             List<ClienteOrigenGis> theList = GetListCustomerLocation();
 
             if (theList == null || theList.Count == 0)
@@ -180,42 +174,49 @@ namespace PrototypeRouteOSM.Pages
                 decimal montoTotal = zona.Clientes.Sum(c => c.PromedioVentas);
                 int tiempoTotal = zona.Clientes.Sum(c => c.TiempoPdv);
 
+                // Calcular distancia total de la ruta
+                double distanciaKm = CalcularDistanciaRuta(zona.Clientes);
+
+                // Estimar tiempo de viaje (asumiendo 30 km/h promedio en ciudad)
+                int tiempoViajeMin = (int)(distanciaKm / 30.0 * 60);
+                int tiempoTotalConViaje = tiempoTotal + tiempoViajeMin;
+
                 switch (zona.ZonaId)
                 {
                     case 1:
                         Clientes1Label.Text = nroClientes.ToString();
                         Monto1Label.Text = montoTotal.ToString("C");
-                        Tiempo1Label.Text = tiempoTotal + " min";
+                        Tiempo1Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
                         break;
                     case 2:
                         Clientes2Label.Text = nroClientes.ToString();
                         Monto2Label.Text = montoTotal.ToString("C");
-                        Tiempo2Label.Text = tiempoTotal + " min";
+                        Tiempo2Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
                         break;
                     case 3:
                         Clientes3Label.Text = nroClientes.ToString();
                         Monto3Label.Text = montoTotal.ToString("C");
-                        Tiempo3Label.Text = tiempoTotal + " min";
+                        Tiempo3Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
                         break;
                     case 4:
                         Clientes4Label.Text = nroClientes.ToString();
                         Monto4Label.Text = montoTotal.ToString("C");
-                        Tiempo4Label.Text = tiempoTotal + " min";
+                        Tiempo4Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
                         break;
                     case 5:
                         Clientes5Label.Text = nroClientes.ToString();
                         Monto5Label.Text = montoTotal.ToString("C");
-                        Tiempo5Label.Text = tiempoTotal + " min";
+                        Tiempo5Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
                         break;
                     case 6:
                         Clientes6Label.Text = nroClientes.ToString();
                         Monto6Label.Text = montoTotal.ToString("C");
-                        Tiempo6Label.Text = tiempoTotal + " min";
+                        Tiempo6Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
                         break;
                     case 7:
                         Clientes7Label.Text = nroClientes.ToString();
                         Monto7Label.Text = montoTotal.ToString("C");
-                        Tiempo7Label.Text = tiempoTotal + " min";
+                        Tiempo7Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
                         break;
                 }
             }
@@ -327,14 +328,14 @@ namespace PrototypeRouteOSM.Pages
                 */
 
                 MostrarMensajeExito("Zonas guardadas exitosamente");
-                //log.Info($"Zonas guardadas por usuario: {usuario}");
+                log.Info($"Zonas guardadas por usuario: {usuario}");
 
                 // Redirigir o limpiar
                 // Response.Redirect("OtraPagina.aspx");
             }
             catch (Exception ex)
             {
-                //log.Error("Error al guardar zonas", ex);
+                log.Error("Error al guardar zonas", ex);
                 MostrarMensajeError("Error al guardar: " + ex.Message);
             }
         }
@@ -413,6 +414,61 @@ namespace PrototypeRouteOSM.Pages
                        .Replace("\"", "\\\"")
                        .Replace("\r", "")
                        .Replace("\n", "\\n");
+        }
+
+        #endregion
+
+        #region Cálculo de Distancias de Ruta
+
+        /// <summary>
+        /// Calcula la distancia total de una ruta siguiendo el orden de la lista de clientes
+        /// </summary>
+        private double CalcularDistanciaRuta(List<ClienteOrigenGis> clientes)
+        {
+            if (clientes == null || clientes.Count < 2)
+                return 0;
+
+            double distanciaTotal = 0;
+
+            // Sumar distancias entre cada par de clientes consecutivos
+            for (int i = 0; i < clientes.Count - 1; i++)
+            {
+                distanciaTotal += CalcularDistanciaHaversine(
+                    clientes[i].Latitud,
+                    clientes[i].Longitud,
+                    clientes[i + 1].Latitud,
+                    clientes[i + 1].Longitud
+                );
+            }
+
+            return distanciaTotal;
+        }
+
+        /// <summary>
+        /// Calcula la distancia en kilómetros entre dos puntos usando la fórmula de Haversine
+        /// </summary>
+        private double CalcularDistanciaHaversine(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double R = 6371; // Radio de la Tierra en kilómetros
+
+            double dLat = ToRadians(lat2 - lat1);
+            double dLon = ToRadians(lon2 - lon1);
+
+            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                       Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                       Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+            return R * c; // Distancia en kilómetros
+        }
+
+        /// <summary>
+        /// Convierte grados a radianes
+        /// </summary>
+        private double ToRadians(double grados)
+        {
+            return grados * Math.PI / 180.0;
         }
 
         #endregion

@@ -65,6 +65,7 @@
         var map;
         var markers = [];
         var layerGroups = {};
+        var routeLines = {}; // Líneas de ruta por zona
 
         // Colores para cada zona (7 colores distintos)
         var zonaColors = {
@@ -108,43 +109,113 @@
             // Crear un grupo de capas para cada zona
             for (var i = 1; i <= 7; i++) {
                 layerGroups[i] = L.layerGroup().addTo(map);
+                routeLines[i] = [];
+            }
+
+            // Organizar clientes por zona (manteniendo el orden original)
+            var clientesPorZona = {};
+            for (var i = 0; i < rutaData.length; i++) {
+                var cliente = rutaData[i];
+                if (!clientesPorZona[cliente.ZonaId]) {
+                    clientesPorZona[cliente.ZonaId] = [];
+                }
+                clientesPorZona[cliente.ZonaId].push(cliente);
             }
 
             var bounds = [];
 
-            // Crear marcadores para cada cliente
-            for (var i = 0; i < rutaData.length; i++) {
-                var cliente = rutaData[i];
-                var zonaId = cliente.ZonaId;
+            // Procesar cada zona
+            for (var zonaId in clientesPorZona) {
+                var clientes = clientesPorZona[zonaId];
                 var color = zonaColors[zonaId] || '#999999';
+                var routeCoords = [];
 
-                // Crear icono personalizado con el color de la zona
-                var customIcon = L.divIcon({
-                    className: 'custom-marker',
-                    html: '<div style="background-color:' + color + '; width: 25px; height: 25px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
-                    iconSize: [25, 25],
-                    iconAnchor: [12, 12]
-                });
+                // Crear marcadores numerados para cada cliente
+                for (var i = 0; i < clientes.length; i++) {
+                    var cliente = clientes[i];
+                    var orden = i + 1; // Número de orden de visita
 
-                // Crear marcador
-                var marker = L.marker([cliente.Latitud, cliente.Longitud], {
-                    icon: customIcon
-                }).addTo(layerGroups[zonaId]);
+                    // Crear icono con número
+                    var customIcon = L.divIcon({
+                        className: 'custom-marker-numbered',
+                        html: '<div style="background-color:' + color + '; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">' + orden + '</div>',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
+                    });
 
-                // Crear popup con información del cliente
-                var popupContent = '<div style="min-width: 200px;">' +
-                    '<h6 style="margin: 0 0 10px 0; color: ' + color + ';"><strong>' + cliente.Nombre + '</strong></h6>' +
-                    '<hr style="margin: 5px 0;">' +
-                    '<p style="margin: 5px 0;"><strong>Zona:</strong> ' + zonaId + '</p>' +
-                    '<p style="margin: 5px 0;"><strong>ID Cliente:</strong> ' + cliente.ClienteId + '</p>' +
-                    '<p style="margin: 5px 0;"><strong>Ventas Promedio:</strong> Bs. ' + cliente.PromedioVentas.toFixed(2) + '</p>' +
-                    '<p style="margin: 5px 0;"><strong>Tiempo PDV:</strong> ' + cliente.TiempoPdv + ' min</p>' +
-                    '</div>';
+                    // Crear marcador
+                    var marker = L.marker([cliente.Latitud, cliente.Longitud], {
+                        icon: customIcon,
+                        zIndexOffset: 1000 // Marcadores sobre las líneas
+                    }).addTo(layerGroups[zonaId]);
 
-                marker.bindPopup(popupContent);
+                    // Crear popup con información del cliente
+                    var popupContent = '<div style="min-width: 220px;">' +
+                        '<h6 style="margin: 0 0 10px 0; color: ' + color + ';"><strong>🚩 Parada #' + orden + '</strong></h6>' +
+                        '<h6 style="margin: 0 0 10px 0;"><strong>' + cliente.Nombre + '</strong></h6>' +
+                        '<hr style="margin: 5px 0;">' +
+                        '<p style="margin: 5px 0;"><strong>Zona:</strong> ' + zonaId + '</p>' +
+                        '<p style="margin: 5px 0;"><strong>ID Cliente:</strong> ' + cliente.ClienteId + '</p>' +
+                        '<p style="margin: 5px 0;"><strong>Ventas Promedio:</strong> Bs. ' + cliente.PromedioVentas.toFixed(2) + '</p>' +
+                        '<p style="margin: 5px 0;"><strong>Tiempo PDV:</strong> ' + cliente.TiempoPdv + ' min</p>' +
+                        '</div>';
 
-                bounds.push([cliente.Latitud, cliente.Longitud]);
-                markers.push(marker);
+                    marker.bindPopup(popupContent);
+
+                    // Guardar coordenadas para la ruta
+                    routeCoords.push([cliente.Latitud, cliente.Longitud]);
+                    bounds.push([cliente.Latitud, cliente.Longitud]);
+                    markers.push(marker);
+                }
+
+                // Dibujar línea de ruta para esta zona
+                if (routeCoords.length > 1) {
+                    var polyline = L.polyline(routeCoords, {
+                        color: color,
+                        weight: 3,
+                        opacity: 0.7,
+                        smoothFactor: 1
+                    }).addTo(layerGroups[zonaId]);
+
+                    // Agregar flechas direccionales (decoradores)
+                    var decorator = L.polylineDecorator(polyline, {
+                        patterns: [
+                            {
+                                offset: '10%',
+                                repeat: 80,
+                                symbol: L.Symbol.arrowHead({
+                                    pixelSize: 10,
+                                    polygon: false,
+                                    pathOptions: {
+                                        color: color,
+                                        fillOpacity: 1,
+                                        weight: 2
+                                    }
+                                })
+                            }
+                        ]
+                    }).addTo(layerGroups[zonaId]);
+
+                    routeLines[zonaId].push(polyline);
+                    routeLines[zonaId].push(decorator);
+
+                    // Calcular y mostrar distancia total de la ruta
+                    var distanciaTotal = calcularDistanciaRuta(routeCoords);
+
+                    // Crear tooltip con distancia en el punto medio de la ruta
+                    var middleIndex = Math.floor(routeCoords.length / 2);
+                    var middlePoint = routeCoords[middleIndex];
+
+                    L.marker(middlePoint, {
+                        icon: L.divIcon({
+                            className: 'route-distance-label',
+                            html: '<div style="background-color: white; padding: 5px 10px; border: 2px solid ' + color + '; border-radius: 15px; font-weight: bold; color: ' + color + '; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">📏 ' + distanciaTotal.toFixed(2) + ' km</div>',
+                            iconSize: [100, 30],
+                            iconAnchor: [50, 15]
+                        }),
+                        zIndexOffset: -100
+                    }).addTo(layerGroups[zonaId]);
+                }
             }
 
             // Ajustar el mapa para mostrar todos los puntos
@@ -156,12 +227,33 @@
             addLayerControl();
         }
 
+        // Calcular distancia total de una ruta usando fórmula Haversine
+        function calcularDistanciaRuta(coords) {
+            var total = 0;
+            for (var i = 0; i < coords.length - 1; i++) {
+                total += calcularDistanciaHaversine(coords[i][0], coords[i][1], coords[i + 1][0], coords[i + 1][1]);
+            }
+            return total;
+        }
+
+        // Fórmula Haversine para calcular distancia en km
+        function calcularDistanciaHaversine(lat1, lon1, lat2, lon2) {
+            var R = 6371; // Radio de la Tierra en km
+            var dLat = (lat2 - lat1) * Math.PI / 180;
+            var dLon = (lon2 - lon1) * Math.PI / 180;
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
         function addLayerControl() {
             var overlays = {};
 
             for (var i = 1; i <= 7; i++) {
                 var color = zonaColors[i];
-                overlays['<span style="color: ' + color + '; font-weight: bold;">● Zona ' + i + '</span>'] = layerGroups[i];
+                overlays['<span style="color: ' + color + '; font-weight: bold;">● Zona ' + i + ' (con ruta)</span>'] = layerGroups[i];
             }
 
             L.control.layers(null, overlays, { collapsed: false }).addTo(map);
@@ -184,6 +276,9 @@
             }
         }
     </script>
+    
+    <!-- Plugin para flechas direccionales en las rutas -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.min.js"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="Server">
@@ -291,7 +386,7 @@
                                             <th>Día</th>
                                             <th>Clientes</th>
                                             <th>Ventas Totales</th>
-                                            <th>Tiempo Total PDV</th>
+                                            <th>Distancia / Tiempo</th>
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
