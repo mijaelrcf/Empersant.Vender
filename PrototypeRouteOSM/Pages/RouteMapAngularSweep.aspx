@@ -128,7 +128,6 @@
             for (var zonaId in clientesPorZona) {
                 var clientes = clientesPorZona[zonaId];
                 var color = zonaColors[zonaId] || '#999999';
-                var routeCoords = [];
 
                 // Crear marcadores numerados para cada cliente
                 for (var i = 0; i < clientes.length; i++) {
@@ -161,60 +160,13 @@
                         '</div>';
 
                     marker.bindPopup(popupContent);
-
-                    // Guardar coordenadas para la ruta
-                    routeCoords.push([cliente.Latitud, cliente.Longitud]);
                     bounds.push([cliente.Latitud, cliente.Longitud]);
                     markers.push(marker);
                 }
 
-                // Dibujar línea de ruta para esta zona
-                if (routeCoords.length > 1) {
-                    var polyline = L.polyline(routeCoords, {
-                        color: color,
-                        weight: 3,
-                        opacity: 0.7,
-                        smoothFactor: 1
-                    }).addTo(layerGroups[zonaId]);
-
-                    // Agregar flechas direccionales (decoradores)
-                    var decorator = L.polylineDecorator(polyline, {
-                        patterns: [
-                            {
-                                offset: '10%',
-                                repeat: 80,
-                                symbol: L.Symbol.arrowHead({
-                                    pixelSize: 10,
-                                    polygon: false,
-                                    pathOptions: {
-                                        color: color,
-                                        fillOpacity: 1,
-                                        weight: 2
-                                    }
-                                })
-                            }
-                        ]
-                    }).addTo(layerGroups[zonaId]);
-
-                    routeLines[zonaId].push(polyline);
-                    routeLines[zonaId].push(decorator);
-
-                    // Calcular y mostrar distancia total de la ruta
-                    var distanciaTotal = calcularDistanciaRuta(routeCoords);
-
-                    // Crear tooltip con distancia en el punto medio de la ruta
-                    var middleIndex = Math.floor(routeCoords.length / 2);
-                    var middlePoint = routeCoords[middleIndex];
-
-                    L.marker(middlePoint, {
-                        icon: L.divIcon({
-                            className: 'route-distance-label',
-                            html: '<div style="background-color: white; padding: 5px 10px; border: 2px solid ' + color + '; border-radius: 15px; font-weight: bold; color: ' + color + '; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">📏 ' + distanciaTotal.toFixed(2) + ' km</div>',
-                            iconSize: [100, 30],
-                            iconAnchor: [50, 15]
-                        }),
-                        zIndexOffset: -100
-                    }).addTo(layerGroups[zonaId]);
+                // Obtener y dibujar ruta real por calles usando OSRM
+                if (clientes.length > 1) {
+                    obtenerRutaReal(clientes, color, zonaId);
                 }
             }
 
@@ -225,6 +177,160 @@
 
             // Agregar control de capas para mostrar/ocultar zonas
             addLayerControl();
+        }
+
+        // Obtener ruta real por calles usando OSRM (Open Source Routing Machine)
+        function obtenerRutaReal(clientes, color, zonaId) {
+            // Construir URL para OSRM API
+            // Formato: lon,lat;lon,lat;lon,lat...
+            var coordsStr = '';
+            for (var i = 0; i < clientes.length; i++) {
+                if (i > 0) coordsStr += ';';
+                coordsStr += clientes[i].Longitud + ',' + clientes[i].Latitud;
+            }
+
+            // API de OSRM (gratuita)
+            var osrmUrl = 'https://router.project-osrm.org/route/v1/driving/' + coordsStr +
+                '?overview=full&geometries=geojson&steps=false';
+
+            // Hacer petición AJAX
+            fetch(osrmUrl)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                        var route = data.routes[0];
+                        var geometry = route.geometry;
+
+                        // Convertir coordenadas GeoJSON a formato Leaflet [lat, lon]
+                        var routeCoords = geometry.coordinates.map(function (coord) {
+                            return [coord[1], coord[0]]; // GeoJSON es [lon, lat], Leaflet es [lat, lon]
+                        });
+
+                        // Dibujar la ruta real
+                        var polyline = L.polyline(routeCoords, {
+                            color: color,
+                            weight: 4,
+                            opacity: 0.8,
+                            smoothFactor: 1
+                        }).addTo(layerGroups[zonaId]);
+
+                        // Agregar flechas direccionales
+                        var decorator = L.polylineDecorator(polyline, {
+                            patterns: [
+                                {
+                                    offset: '5%',
+                                    repeat: 100,
+                                    symbol: L.Symbol.arrowHead({
+                                        pixelSize: 12,
+                                        polygon: false,
+                                        pathOptions: {
+                                            color: color,
+                                            fillOpacity: 1,
+                                            weight: 2
+                                        }
+                                    })
+                                }
+                            ]
+                        }).addTo(layerGroups[zonaId]);
+
+                        routeLines[zonaId].push(polyline);
+                        routeLines[zonaId].push(decorator);
+
+                        // Obtener distancia real de OSRM (en metros)
+                        var distanciaMetros = route.distance;
+                        var distanciaKm = distanciaMetros / 1000;
+
+                        // Obtener duración (en segundos)
+                        var duracionSegundos = route.duration;
+                        var duracionMinutos = Math.round(duracionSegundos / 60);
+
+                        // Crear tooltip con distancia y tiempo en el punto medio
+                        var middleIndex = Math.floor(routeCoords.length / 2);
+                        var middlePoint = routeCoords[middleIndex];
+
+                        var tooltipHTML = '<div style="background-color: white; padding: 8px 12px; border: 2px solid ' + color +
+                            '; border-radius: 20px; font-weight: bold; color: ' + color +
+                            '; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">' +
+                            '🚗 ' + distanciaKm.toFixed(2) + ' km | ⏱️ ' + duracionMinutos + ' min' +
+                            '</div>';
+
+                        L.marker(middlePoint, {
+                            icon: L.divIcon({
+                                className: 'route-distance-label',
+                                html: tooltipHTML,
+                                iconSize: [180, 35],
+                                iconAnchor: [90, 17]
+                            }),
+                            zIndexOffset: -100
+                        }).addTo(layerGroups[zonaId]);
+
+                        console.log('Zona ' + zonaId + ': Ruta cargada - ' + distanciaKm.toFixed(2) + ' km, ' + duracionMinutos + ' min');
+
+                    } else {
+                        // Si OSRM falla, usar líneas rectas como fallback
+                        console.warn('OSRM falló para zona ' + zonaId + ', usando líneas rectas');
+                        dibujarRutaDirecta(clientes, color, zonaId);
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error al obtener ruta de OSRM para zona ' + zonaId + ':', error);
+                    // Fallback a líneas rectas
+                    dibujarRutaDirecta(clientes, color, zonaId);
+                });
+        }
+
+        // Función fallback: dibujar líneas rectas si OSRM no funciona
+        function dibujarRutaDirecta(clientes, color, zonaId) {
+            var routeCoords = [];
+            for (var i = 0; i < clientes.length; i++) {
+                routeCoords.push([clientes[i].Latitud, clientes[i].Longitud]);
+            }
+
+            var polyline = L.polyline(routeCoords, {
+                color: color,
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '5, 10', // Línea punteada para distinguir del routing real
+                smoothFactor: 1
+            }).addTo(layerGroups[zonaId]);
+
+            var decorator = L.polylineDecorator(polyline, {
+                patterns: [
+                    {
+                        offset: '10%',
+                        repeat: 80,
+                        symbol: L.Symbol.arrowHead({
+                            pixelSize: 10,
+                            polygon: false,
+                            pathOptions: {
+                                color: color,
+                                fillOpacity: 1,
+                                weight: 2
+                            }
+                        })
+                    }
+                ]
+            }).addTo(layerGroups[zonaId]);
+
+            routeLines[zonaId].push(polyline);
+            routeLines[zonaId].push(decorator);
+
+            var distanciaTotal = calcularDistanciaRuta(routeCoords);
+
+            var middleIndex = Math.floor(routeCoords.length / 2);
+            var middlePoint = routeCoords[middleIndex];
+
+            L.marker(middlePoint, {
+                icon: L.divIcon({
+                    className: 'route-distance-label',
+                    html: '<div style="background-color: white; padding: 5px 10px; border: 2px solid ' + color + '; border-radius: 15px; font-weight: bold; color: ' + color + '; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">📏 ~' + distanciaTotal.toFixed(2) + ' km (estimado)</div>',
+                    iconSize: [150, 30],
+                    iconAnchor: [75, 15]
+                }),
+                zIndexOffset: -100
+            }).addTo(layerGroups[zonaId]);
         }
 
         // Calcular distancia total de una ruta usando fórmula Haversine

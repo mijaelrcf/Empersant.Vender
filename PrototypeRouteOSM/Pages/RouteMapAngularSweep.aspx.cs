@@ -46,7 +46,7 @@ namespace PrototypeRouteOSM.Pages
             try
             {
                 // Generar 100 clientes de ejemplo en La Paz
-                List<ClienteOrigenGis> clientesDemo = GetListCustomerLocation();
+                List<ClienteOrigenGis> clientesDemo = GenerarClientesLaPazDemoCustom();
 
                 // Número de zonas por defecto
                 int nroZonas = 5;
@@ -112,7 +112,7 @@ namespace PrototypeRouteOSM.Pages
 
             // AQUÍ DEBERÍAS OBTENER LOS CLIENTES DE TU BASE DE DATOS
             // Por ahora, usamos el demo
-            List<ClienteOrigenGis> theList = GetListCustomerLocation();
+            List<ClienteOrigenGis> theList = GenerarClientesLaPazDemoCustom();
 
             if (theList == null || theList.Count == 0)
             {
@@ -174,49 +174,50 @@ namespace PrototypeRouteOSM.Pages
                 decimal montoTotal = zona.Clientes.Sum(c => c.PromedioVentas);
                 int tiempoTotal = zona.Clientes.Sum(c => c.TiempoPdv);
 
-                // Calcular distancia total de la ruta
-                double distanciaKm = CalcularDistanciaRuta(zona.Clientes);
+                // Nota: La distancia real por calles se calcula en el cliente usando OSRM
+                // Aquí mostramos una estimación usando distancia directa
+                double distanciaEstimadaKm = CalcularDistanciaRuta(zona.Clientes);
 
-                // Estimar tiempo de viaje (asumiendo 30 km/h promedio en ciudad)
-                int tiempoViajeMin = (int)(distanciaKm / 30.0 * 60);
-                int tiempoTotalConViaje = tiempoTotal + tiempoViajeMin;
+                // Estimar tiempo de viaje (la duración real se obtiene de OSRM en el mapa)
+                int tiempoViajeEstimadoMin = (int)(distanciaEstimadaKm / 30.0 * 60);
+                int tiempoTotalEstimado = tiempoTotal + tiempoViajeEstimadoMin;
 
                 switch (zona.ZonaId)
                 {
                     case 1:
                         Clientes1Label.Text = nroClientes.ToString();
                         Monto1Label.Text = montoTotal.ToString("C");
-                        Tiempo1Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
+                        Tiempo1Label.Text = $"~{distanciaEstimadaKm:F1} km | {tiempoTotalEstimado} min (ver mapa)";
                         break;
                     case 2:
                         Clientes2Label.Text = nroClientes.ToString();
                         Monto2Label.Text = montoTotal.ToString("C");
-                        Tiempo2Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
+                        Tiempo2Label.Text = $"~{distanciaEstimadaKm:F1} km | {tiempoTotalEstimado} min (ver mapa)";
                         break;
                     case 3:
                         Clientes3Label.Text = nroClientes.ToString();
                         Monto3Label.Text = montoTotal.ToString("C");
-                        Tiempo3Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
+                        Tiempo3Label.Text = $"~{distanciaEstimadaKm:F1} km | {tiempoTotalEstimado} min (ver mapa)";
                         break;
                     case 4:
                         Clientes4Label.Text = nroClientes.ToString();
                         Monto4Label.Text = montoTotal.ToString("C");
-                        Tiempo4Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
+                        Tiempo4Label.Text = $"~{distanciaEstimadaKm:F1} km | {tiempoTotalEstimado} min (ver mapa)";
                         break;
                     case 5:
                         Clientes5Label.Text = nroClientes.ToString();
                         Monto5Label.Text = montoTotal.ToString("C");
-                        Tiempo5Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
+                        Tiempo5Label.Text = $"~{distanciaEstimadaKm:F1} km | {tiempoTotalEstimado} min (ver mapa)";
                         break;
                     case 6:
                         Clientes6Label.Text = nroClientes.ToString();
                         Monto6Label.Text = montoTotal.ToString("C");
-                        Tiempo6Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
+                        Tiempo6Label.Text = $"~{distanciaEstimadaKm:F1} km | {tiempoTotalEstimado} min (ver mapa)";
                         break;
                     case 7:
                         Clientes7Label.Text = nroClientes.ToString();
                         Monto7Label.Text = montoTotal.ToString("C");
-                        Tiempo7Label.Text = $"{distanciaKm:F2} km | {tiempoTotalConViaje} min total";
+                        Tiempo7Label.Text = $"~{distanciaEstimadaKm:F1} km | {tiempoTotalEstimado} min (ver mapa)";
                         break;
                 }
             }
@@ -562,8 +563,8 @@ namespace PrototypeRouteOSM.Pages
             return clientes;
         }
 
-        
-        public static List<ClienteOrigenGis> GetListCustomerLocation()
+
+        public static List<ClienteOrigenGis> GenerarClientesLaPazDemoCustom()
         {
             var repo = new CustomerRepository();
             var listCustomers = repo.GetAll();
